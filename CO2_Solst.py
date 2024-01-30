@@ -29,6 +29,33 @@ def predict_solubility(data0):
     rP = pressures_converted / pc
     rT = temp / tc
     Inputs = pd.DataFrame({'rT': np.full_like(pressures_converted, rT), 'rP': rP})
+    # Read ion fixed properties (charge and energy) from a file or any other source
+    ion_properties = {
+        'Na': {'charge': 1, 'energy': 365},
+        'Cl': {'charge': 1, 'energy': 340},
+        'HCO3': {'charge': 1, 'energy': 335},
+        'Ca': {'charge': 2, 'energy': 1505},
+        'CO3': {'charge': 2, 'energy': 1315},
+        'SO4': {'charge': 2, 'energy': 1080},
+        'Mg': {'charge': 2, 'energy': 1830},
+        'K': {'charge': 1, 'energy': 295},
+        # Add more ions as needed
+    }
+
+    # Loop through ions and set charge and energy to zero if concentration is zero
+    for ion, properties in ion_properties.items():
+        concentration_col = f'{ion}_concentration'  # Replace with actual concentration column name
+        charge_col = f'{ion}_charge'  # Added for charge
+        energy_col = f'{ion}_energy'  # Added for energy
+
+        if ion not in data0.columns or concentration_col not in data0.columns or charge_col not in data0.columns:
+            continue  # Skip if ion, concentration, or charge column not found in the data
+
+        zero_concentration_mask = data0[concentration_col] == 0
+        data0.loc[zero_concentration_mask, charge_col] = 0
+        data0.loc[zero_concentration_mask, energy_col] = 0
+
+    # Continue with the rest of the code
     file_inputs = 'pure_water_solubility.pkl'
     with open(file_inputs, 'rb') as f_pure:
         model_pure = pickle.load(f_pure)
@@ -48,6 +75,7 @@ def predict_solubility(data0):
     results['Pure Water Solubility (Mole Frac)'] = sol
     results['Co2 Solubility in Brine at P&T(Mole Frac)'] = sol * solb
     return results
+
 html_temp = """
 <div style="background-color:tomato;padding:1.5px">
 <h1 style="color:white;text-align:center;">UH CO2 Solubility in Brine Calculator  </h1>

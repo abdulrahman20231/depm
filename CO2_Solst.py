@@ -98,7 +98,6 @@ def predict_solubility(data0):
     return results
 
 
-
 html_temp = """
 <div style="background-color:tomato;padding:1.5px">
 <h1 style="color:white;text-align:center;">UH CO2 Solubility in Brine Calculator  </h1>

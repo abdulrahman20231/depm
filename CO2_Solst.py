@@ -58,18 +58,23 @@ def predict_solubility(data0):
     if missing_columns:
         raise KeyError(f"Columns not found in data0: {missing_columns}")
 
-    # Arrange columns in the correct order
-    data1 = data0[columns_order]
+    # Initialize data1 with concentrations and P, T columns
+    data1 = data0[columns_order[-8:]]
 
-    # Loop through ions and set charge and energy to zero if concentration is zero
+    # Loop through ions and insert charges and energy
     for ion, properties in ion_properties.items():
-        concentration_col = f'{ion}_concentration'
         charge_col = f'{ion}_charge'
         energy_col = f'{ion}_energy'
+        concentration_col = f'{ion}_concentration'
 
         zero_concentration_mask = data0[concentration_col] == 0
-        data1.loc[zero_concentration_mask, charge_col] = 0
-        data1.loc[zero_concentration_mask, energy_col] = 0
+        data1[charge_col] = 0  # Initialize with zero charge
+        data1[energy_col] = 0  # Initialize with zero energy
+
+        # Update with actual values for non-zero concentrations
+        non_zero_concentration_mask = ~zero_concentration_mask
+        data1.loc[non_zero_concentration_mask, charge_col] = properties['charge']
+        data1.loc[non_zero_concentration_mask, energy_col] = properties['energy']
 
     # Continue with the rest of the code
     file_inputs = 'pure_water_solubility.pkl'
@@ -91,7 +96,6 @@ def predict_solubility(data0):
     results['Pure Water Solubility (Mole Frac)'] = sol
     results['Co2 Solubility in Brine at P&T(Mole Frac)'] = sol * solb
     return results
-
 
 
 

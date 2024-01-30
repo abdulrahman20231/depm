@@ -18,10 +18,6 @@ def download_link(object_to_download, download_filename):
     return f'<a href="{href}" download="{download_filename}">Download Results</a>'
 
 # Function to predict solubility
-# Function to predict solubility
-# Function to predict solubility
-# Function to predict solubility
-# Function to predict solubility
 def predict_solubility(data0):
     P = data0['P,Psia']
     T = data0['T,F']
@@ -49,7 +45,7 @@ def predict_solubility(data0):
     for ion, properties in ion_properties.items():
         charge_col = f'{ion}_charge'
         energy_col = f'{ion}_energy'
-        concentration_col = f'{ion}_concentration'
+        concentration_col = f'{ion}_concentration_wt%'
 
         data0[charge_col] = np.where(data0[concentration_col] != 0, properties['charge'], 0)
         data0[energy_col] = np.where(data0[concentration_col] != 0, properties['energy'], 0)

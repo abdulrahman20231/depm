@@ -18,6 +18,7 @@ def download_link(object_to_download, download_filename):
     return f'<a href="{href}" download="{download_filename}">Download Results</a>'
 
 # Function to predict solubility
+# Function to predict solubility
 def predict_solubility(data0):
     P = data0['P,Psia']
     T = data0['T,F']
@@ -40,6 +41,14 @@ def predict_solubility(data0):
         'Mg': {'charge': 2, 'energy': 1830},
         'K': {'charge': 1, 'energy': 295},
     }
+
+    # Define columns_order before using it
+    columns_order = [
+        'Na_charge', 'Cl_charge', 'HCO3_charge', 'Ca_charge', 'CO3_charge', 'SO4_charge', 'Mg_charge', 'K_charge',
+        'Na_energy', 'Cl_energy', 'HCO3_energy', 'Ca_energy', 'CO3_energy', 'SO4_energy', 'Mg_energy', 'K_energy',
+        'Na_concentration', 'Cl_concentration', 'HCO3_concentration', 'Ca_concentration', 'CO3_concentration',
+        'SO4_concentration', 'Mg_concentration', 'K_concentration', 'P,Psia', 'T,F'
+    ]
 
     # Ensure all columns in columns_order are present in data0
     missing_columns = [col for col in columns_order if col not in data0.columns]
@@ -79,6 +88,7 @@ def predict_solubility(data0):
     results['Pure Water Solubility (Mole Frac)'] = sol
     results['Co2 Solubility in Brine at P&T(Mole Frac)'] = sol * solb
     return results
+
 
 
 

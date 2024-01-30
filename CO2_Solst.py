@@ -19,7 +19,6 @@ def download_link(object_to_download, download_filename):
 
 # Function to predict solubility
 def predict_solubility(data0):
-    data1 = data0.iloc[:, 0:24]
     P = data0['P,Psia']
     T = data0['T,F']
     pressures_converted = P / 14.504
@@ -29,6 +28,7 @@ def predict_solubility(data0):
     rP = pressures_converted / pc
     rT = temp / tc
     Inputs = pd.DataFrame({'rT': np.full_like(pressures_converted, rT), 'rP': rP})
+
     # Read ion fixed properties (charge and energy) from a file or any other source
     ion_properties = {
         'Na': {'charge': 1, 'energy': 365},
@@ -39,8 +39,18 @@ def predict_solubility(data0):
         'SO4': {'charge': 2, 'energy': 1080},
         'Mg': {'charge': 2, 'energy': 1830},
         'K': {'charge': 1, 'energy': 295},
-        # Add more ions as needed
     }
+
+    # Arrange columns in the correct order
+    columns_order = [
+        'Na_charge', 'Cl_charge', 'HCO3_charge', 'Ca_charge', 'CO3_charge', 'SO4_charge', 'Mg_charge', 'K_charge',
+        'Na_energy', 'Cl_energy', 'HCO3_energy', 'Ca_energy', 'CO3_energy', 'SO4_energy', 'Mg_energy', 'K_energy',
+        'Na_concentration', 'Cl_concentration', 'HCO3_concentration', 'Ca_concentration', 'CO3_concentration',
+        'SO4_concentration', 'Mg_concentration', 'K_concentration', 'P,Psia', 'T,F'
+    ]
+
+    # Rearrange columns in the correct order
+    data1 = data0[columns_order]
 
     # Loop through ions and set charge and energy to zero if concentration is zero
     for ion, properties in ion_properties.items():
@@ -75,6 +85,7 @@ def predict_solubility(data0):
     results['Pure Water Solubility (Mole Frac)'] = sol
     results['Co2 Solubility in Brine at P&T(Mole Frac)'] = sol * solb
     return results
+
 
 html_temp = """
 <div style="background-color:tomato;padding:1.5px">

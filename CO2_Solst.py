@@ -41,25 +41,19 @@ def predict_solubility(data0):
         'K': {'charge': 1, 'energy': 295},
     }
 
-    # Arrange columns in the correct order
-    columns_order = [
-        'Na_charge', 'Cl_charge', 'HCO3_charge', 'Ca_charge', 'CO3_charge', 'SO4_charge', 'Mg_charge', 'K_charge',
-        'Na_energy', 'Cl_energy', 'HCO3_energy', 'Ca_energy', 'CO3_energy', 'SO4_energy', 'Mg_energy', 'K_energy',
-        'Na_concentration', 'Cl_concentration', 'HCO3_concentration', 'Ca_concentration', 'CO3_concentration',
-        'SO4_concentration', 'Mg_concentration', 'K_concentration', 'P,Psia', 'T,F'
-    ]
+    # Ensure all columns in columns_order are present in data0
+    missing_columns = [col for col in columns_order if col not in data0.columns]
+    if missing_columns:
+        raise KeyError(f"Columns not found in data0: {missing_columns}")
 
-    # Rearrange columns in the correct order
+    # Arrange columns in the correct order
     data1 = data0[columns_order]
 
     # Loop through ions and set charge and energy to zero if concentration is zero
     for ion, properties in ion_properties.items():
-        concentration_col = f'{ion}_concentration'  # Replace with actual concentration column name
-        charge_col = f'{ion}_charge'  # Added for charge
-        energy_col = f'{ion}_energy'  # Added for energy
-
-        if ion not in data0.columns or concentration_col not in data0.columns or charge_col not in data0.columns:
-            continue  # Skip if ion, concentration, or charge column not found in the data
+        concentration_col = f'{ion}_concentration'
+        charge_col = f'{ion}_charge'
+        energy_col = f'{ion}_energy'
 
         zero_concentration_mask = data0[concentration_col] == 0
         data0.loc[zero_concentration_mask, charge_col] = 0
@@ -85,6 +79,7 @@ def predict_solubility(data0):
     results['Pure Water Solubility (Mole Frac)'] = sol
     results['Co2 Solubility in Brine at P&T(Mole Frac)'] = sol * solb
     return results
+
 
 
 html_temp = """

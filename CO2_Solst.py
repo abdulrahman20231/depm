@@ -16,7 +16,6 @@ def download_link(object_to_download, download_filename):
 
 # Function to predict solubility
 def predict_solubility(data0):
-    def predict_solubility(data0):
     P = data0['P,Psia']
     T = data0['T,F']
     pressures_converted = P / 14.504

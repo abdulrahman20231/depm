@@ -21,8 +21,7 @@ def predict_solubility(data0):
 html_temp = """
 <div style="background-color:tomato;padding:10px;border-radius:10px;margin-bottom:20px">
 <h1 style="color:white;text-align:center;">UH CO2 Solubility in Brine Calculator</h1>
-</div>
-"""
+</div>"""
 st.markdown(html_temp, unsafe_allow_html=True)
 
 st.header("Department of Petroleum Engineering: Interaction of Phase Behavior and Flow in Porous Media ([IPBFPM](https://dindoruk.egr.uh.edu/)) Consortium.")

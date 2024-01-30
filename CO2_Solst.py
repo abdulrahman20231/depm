@@ -3,12 +3,9 @@ import streamlit as st
 import pickle
 import base64
 import numpy as np
+from PIL import Image
 
-import requests
-# df = pd.read_csv("C:/Utilities/MMP Papers/HC inj code/MMP_HC_Data ALLwith SG_Clean.csv")
-# read a CSV file inside the 'data" folder next to 'app.py'
-# df = pd.read_excel(...)  # will work for Excel files
- #Function to download data as csv
+# Function to download data as csv
 def download_link(object_to_download, download_filename):
     if isinstance(object_to_download, pd.DataFrame):
         object_to_download = object_to_download.to_csv(index=False)
@@ -45,10 +42,15 @@ def predict_solubility(data0):
     for ion, properties in ion_properties.items():
         charge_col = f'{ion}_charge'
         energy_col = f'{ion}_energy'
-        concentration_col = f'{ion}_concentration_wt%'
+        concentration_col_wt = f'{ion}_concentration_wt%'
+        concentration_col = f'{ion}_concentration'
 
-        data0[charge_col] = np.where(data0[concentration_col] != 0, properties['charge'], 0)
-        data0[energy_col] = np.where(data0[concentration_col] != 0, properties['energy'], 0)
+        data0[charge_col] = np.where(data0[concentration_col_wt] != 0, properties['charge'], 0)
+        data0[energy_col] = np.where(data0[concentration_col_wt] != 0, properties['energy'], 0)
+        data0[concentration_col] = data0[concentration_col_wt]  # Copy values without '_wt%' suffix
+
+    # Drop columns with '_wt%' suffix
+    data0 = data0.drop(columns=[f'{ion}_concentration_wt%' for ion in ion_properties.keys()])
 
     # Continue with the rest of the code
     file_inputs = 'pure_water_solubility.pkl'
@@ -96,7 +98,6 @@ st.subheader(
     "[Download Input Template File.](https://drive.google.com/file/d/1IrmFmwePqceAU4qlLBqsmssMtXlAe1Pm/view?usp=sharing)")
 # st.markdown("[Input Template File Link](https://drive.google.com/file/d/1HNyZjobmTEBcWfk0C2cmClQfahTONrX1/view?usp=sharing)",unsafe_allow_html=True)
 
-
 file = st.file_uploader("Upload the CSV file", type=['csv'])
 
 if file is not None:
@@ -122,9 +123,5 @@ st.subheader(
     "[Based on the work in Ref;Ratnakar, R. R., Chaubey, V., & Dindoruk, B. (2023). A novel computational strategy to estimate CO2 solubility in brine solutions for CCUS applications. Applied Energy, 342, 121134.](https://www.sciencedirect.com/science/article/pii/S0306261923004981?casa_token=kPpCANAGDIUAAAAA:IGNAx8egWSeRs54UtPnUG1C9OLRKir1DOGPwYm7O2nfeWCP4wKqsCY46_sJGVrk9-YgDrclfGzB4)")
 # st.subheader('[Ref.:Ratnakar, R. R., Chaubey, V., & Dindoruk, B. (2023). A novel computational strategy to estimate CO2 solubility in brine solutions for CCUS applications. Applied Energy, 342, 121134.](https://www.sciencedirect.com/science/article/pii/S0306261923004981?casa_token=kPpCANAGDIUAAAAA:IGNAx8egWSeRs54UtPnUG1C9OLRKir1DOGPwYm7O2nfeWCP4wKqsCY46_sJGVrk9-YgDrclfGzB4)')
 
-from PIL import Image
-
 image = Image.open('uhlogo.jpg')
-st.image(image, caption='A product of University of Houston')
-
-# print('result===',result)
+st.image(image, caption='A product of the University of Houston')

@@ -24,11 +24,11 @@ def download_link(object_to_download, download_filename):
 def predict_solubility(data0):
     # ... (unchanged)
 
-# HTML styling for better appearance
-html_temp = """
-    <div style="background-color: #1f68b4; padding: 1.5px">
-        <h1 style="color: white; text-align: center;">UH CO2 Solubility in Brine Calculator</h1>
-    </div><br>
+    # HTML styling for better appearance
+    html_temp = """
+        <div style="background-color: #1f68b4; padding: 1.5px">
+            <h1 style="color: white; text-align: center;">UH CO2 Solubility in Brine Calculator</h1>
+        </div><br>
 """
 st.markdown(html_temp, unsafe_allow_html=True)
 

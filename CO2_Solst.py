@@ -21,6 +21,7 @@ def download_link(object_to_download, download_filename):
 # Function to predict solubility
 # Function to predict solubility
 # Function to predict solubility
+# Function to predict solubility
 def predict_solubility(data0):
     P = data0['P,Psia']
     T = data0['T,F']
@@ -59,22 +60,28 @@ def predict_solubility(data0):
         model_pure = pickle.load(f_pure)
         sc1 = model_pure['scaler']
         model1 = model_pure['model']
+        # Make sure the order of features in sc1 is the same as the order in the input data
+        sc1_features = sc1.get_feature_names_out()
+        Inputs = Inputs[sc1_features]
     X_input1 = sc1.transform(Inputs)
-    sol = model1.predict(X_input1)
+
     file_inputs1 = 'CO2_Brine_solubility.pkl'
     with open(file_inputs1, 'rb') as f_brine:
         model_brine = pickle.load(f_brine)
         sc2 = model_brine['scaler']
         model2 = model_brine['model']
+        # Make sure the order of features in sc2 is the same as the order in the input data
+        sc2_features = sc2.get_feature_names_out()
+        data0 = data0[sc2_features]
     X_inputb = sc2.transform(data0)
+
+    sol = model1.predict(X_input1)
     solb = model2.predict(X_inputb)
     results = data0.copy()
     results['Brine to Pure Water solubility Ratio'] = solb
     results['Pure Water Solubility (Mole Frac)'] = sol
     results['Co2 Solubility in Brine at P&T(Mole Frac)'] = sol * solb
     return results
-
-
 
 html_temp = """
 <div style="background-color:tomato;padding:1.5px">

@@ -52,6 +52,9 @@ def predict_solubility(data0):
 
     # Ensure all columns in columns_order are present in data0
     missing_columns = [col for col in columns_order if col not in data0.columns]
+    print(f"Columns in data0: {list(data0.columns)}")
+    print(f"Columns_order: {columns_order}")
+
     if missing_columns:
         raise KeyError(f"Columns not found in data0: {missing_columns}")
 
@@ -88,6 +91,7 @@ def predict_solubility(data0):
     results['Pure Water Solubility (Mole Frac)'] = sol
     results['Co2 Solubility in Brine at P&T(Mole Frac)'] = sol * solb
     return results
+
 
 
 

@@ -68,8 +68,8 @@ def predict_solubility(data0):
         energy_col = f'{ion}_energy'
 
         zero_concentration_mask = data0[concentration_col] == 0
-        data0.loc[zero_concentration_mask, charge_col] = 0
-        data0.loc[zero_concentration_mask, energy_col] = 0
+        data1.loc[zero_concentration_mask, charge_col] = 0
+        data1.loc[zero_concentration_mask, energy_col] = 0
 
     # Continue with the rest of the code
     file_inputs = 'pure_water_solubility.pkl'
@@ -91,7 +91,6 @@ def predict_solubility(data0):
     results['Pure Water Solubility (Mole Frac)'] = sol
     results['Co2 Solubility in Brine at P&T(Mole Frac)'] = sol * solb
     return results
-
 
 
 

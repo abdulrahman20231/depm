@@ -45,8 +45,8 @@ def predict_solubility(data0):
     solb = model2.predict(X_inputb)
     results = data0.copy()
     results['Brine to Pure Water solubility Ratio'] = solb
-    results['Pure Water Solubility Mole Frac'] = sol
-    results['Co2 Solubility in Brine at P&T'] = sol * solb
+    results['Pure Water Solubility (Mole Frac)'] = sol
+    results['Co2 Solubility in Brine at P&T(Mole Frac)'] = sol * solb
     return results
 html_temp = """
 <div style="background-color:tomato;padding:1.5px">

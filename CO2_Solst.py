@@ -95,8 +95,9 @@ st.subheader(
     "Product Description - Calculates the CO2 Solubility in Brine for Different 9 Salts type at specific Pressure and Temperature.")
 st.markdown('<style>h2{color: red;}</style>', unsafe_allow_html=True)
 st.subheader(
-    "[Download Input Template File](https://drive.google.com/file/d/1-UV3qfaFh39qHkoAJYZBhtUrJhPZHE54/view?usp=sharing")
+    "[Download Input Template File.](https://drive.google.com/file/d/1IrmFmwePqceAU4qlLBqsmssMtXlAe1Pm/view?usp=sharing)")
 # st.markdown("[Input Template File Link](https://drive.google.com/file/d/1HNyZjobmTEBcWfk0C2cmClQfahTONrX1/view?usp=sharing)",unsafe_allow_html=True)
+
 
 file = st.file_uploader("Upload the CSV file", type=['csv'])
 

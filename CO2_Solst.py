@@ -2,7 +2,6 @@ import pandas as pd
 import streamlit as st
 import pickle
 import numpy as np
-from PIL import Image
 import os
 
 # -----------------------------
@@ -48,7 +47,6 @@ def predict_solubility(data0):
     rT = temp / tc
     Inputs = pd.DataFrame({'rT': np.full_like(pressures_converted, rT), 'rP': rP})
 
-    # Read ion fixed properties
     ion_properties = {
         'Na': {'charge': 1, 'energy': 365},
         'Cl': {'charge': 1, 'energy': 340},
@@ -60,7 +58,6 @@ def predict_solubility(data0):
         'K': {'charge': 1, 'energy': 295},
     }
 
-    # Add charges and energy columns based on concentration values
     for ion, properties in ion_properties.items():
         charge_col = f'{ion}_charge'
         energy_col = f'{ion}_energy'
@@ -71,10 +68,8 @@ def predict_solubility(data0):
         data0[energy_col] = np.where(data0[concentration_col_wt] != 0, properties['energy'], 0)
         data0[concentration_col] = data0[concentration_col_wt]
 
-    # Drop columns with '_wt%' suffix
     data0 = data0.drop(columns=[f'{ion}_concentration_wt%' for ion in ion_properties.keys()])
 
-    # Pure water solubility model
     file_inputs = 'pure_water_solubility.pkl'
     with open(file_inputs, 'rb') as f_pure:
         model_pure = pickle.load(f_pure)
@@ -85,7 +80,6 @@ def predict_solubility(data0):
 
     X_input1 = sc1.transform(Inputs)
 
-    # CO2 brine solubility model
     file_inputs1 = 'CO2_Brine_solubility.pkl'
     with open(file_inputs1, 'rb') as f_brine:
         model_brine = pickle.load(f_brine)
@@ -128,7 +122,7 @@ st.markdown(
     "2) **Based on the work shown in:** "
     "[Ratnakar, R. R., Chaubey, V., & Dindoruk, B. (2023). "
     "A novel computational strategy to estimate CO₂ solubility in brine solutions for CCUS applications. "
-    "Applied Energy, 342, 121134.](https://www.sciencedirect.com/science/article/pii/S0306261923004981?casa_token=kPpCANAGDIUAAAAA:IGNAx8egWSeRs54UtPnUG1C9OLRKir1DOGPwYm7O2nfeWCP4wKqsCY46_sJGVrk9-YgDrclfGzB4)"
+    "Applied Energy, 342, 121134.](https://www.sciencedirect.com/science/article/pii/S0306261923004981)"
 )
 
 st.divider()
@@ -143,12 +137,36 @@ if file is not None:
         # Load the data
         data = pd.read_csv(file)
 
-        # Display the loaded data
+        # Clean extra spaces from column names
+        data.columns = data.columns.str.strip()
+
+        required_cols = [
+            "P,Psia",
+            "T,F",
+            "Na_concentration_wt%",
+            "Cl_concentration_wt%",
+            "HCO3_concentration_wt%",
+            "Ca_concentration_wt%",
+            "CO3_concentration_wt%",
+            "SO4_concentration_wt%",
+            "Mg_concentration_wt%",
+            "K_concentration_wt%",
+        ]
+
+        missing_cols = [col for col in required_cols if col not in data.columns]
+
+        if missing_cols:
+            st.error(f"Missing required columns: {missing_cols}")
+            st.write("Columns found in your uploaded CSV:")
+            st.write(list(data.columns))
+            st.stop()
+
+        # Display loaded data
         st.subheader("Loaded Data:")
         st.dataframe(data, use_container_width=True)
 
         # Automatically run prediction
-        results = predict_solubility(data)
+        results = predict_solubility(data.copy())
 
         # Display prediction results
         st.subheader("Prediction Results:")

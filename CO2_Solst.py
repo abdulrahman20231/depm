@@ -1,7 +1,6 @@
 import pandas as pd
 import streamlit as st
 import pickle
-import base64
 import numpy as np
 from PIL import Image
 import os
@@ -9,7 +8,7 @@ import os
 # -----------------------------
 # Page configuration and style
 # -----------------------------
-st.set_page_config(page_title=" CO2 Solubility Calculator", layout="wide")
+st.set_page_config(page_title="CO2 Solubility Calculator", layout="wide")
 
 st.markdown(
     """
@@ -36,19 +35,8 @@ with logo2:
         st.image("IPBF.png", width=200)
 
 # -----------------------------
-# Original functions
-# -----------------------------
-
-# Function to download data as csv
-def download_link(object_to_download, download_filename):
-    if isinstance(object_to_download, pd.DataFrame):
-        object_to_download = object_to_download.to_csv(index=False)
-
-    b64 = base64.b64encode(object_to_download.encode()).decode()
-    href = f'data:file/csv;base64,{b64}'
-    return f'<a href="{href}" download="{download_filename}">Download Results</a>'
-
 # Function to predict solubility
+# -----------------------------
 def predict_solubility(data0):
     P = data0['P,Psia']
     T = data0['T,F']
@@ -60,7 +48,7 @@ def predict_solubility(data0):
     rT = temp / tc
     Inputs = pd.DataFrame({'rT': np.full_like(pressures_converted, rT), 'rP': rP})
 
-    # Read ion fixed properties (charge and energy) from a file or any other source
+    # Read ion fixed properties
     ion_properties = {
         'Na': {'charge': 1, 'energy': 365},
         'Cl': {'charge': 1, 'energy': 340},
@@ -81,44 +69,47 @@ def predict_solubility(data0):
 
         data0[charge_col] = np.where(data0[concentration_col_wt] != 0, properties['charge'], 0)
         data0[energy_col] = np.where(data0[concentration_col_wt] != 0, properties['energy'], 0)
-        data0[concentration_col] = data0[concentration_col_wt]  # Copy values without '_wt%' suffix
+        data0[concentration_col] = data0[concentration_col_wt]
 
     # Drop columns with '_wt%' suffix
     data0 = data0.drop(columns=[f'{ion}_concentration_wt%' for ion in ion_properties.keys()])
 
-    # Continue with the rest of the code
+    # Pure water solubility model
     file_inputs = 'pure_water_solubility.pkl'
     with open(file_inputs, 'rb') as f_pure:
         model_pure = pickle.load(f_pure)
         sc1 = model_pure['scaler']
         model1 = model_pure['model']
-        # Make sure the order of features in sc1 is the same as the order in the input data
         sc1_features = sc1.get_feature_names_out()
         Inputs = Inputs[sc1_features]
+
     X_input1 = sc1.transform(Inputs)
 
+    # CO2 brine solubility model
     file_inputs1 = 'CO2_Brine_solubility.pkl'
     with open(file_inputs1, 'rb') as f_brine:
         model_brine = pickle.load(f_brine)
         sc2 = model_brine['scaler']
         model2 = model_brine['model']
-        # Make sure the order of features in sc2 is the same as the order in the input data
         sc2_features = sc2.get_feature_names_out()
         data0 = data0[sc2_features]
+
     X_inputb = sc2.transform(data0)
 
     sol = model1.predict(X_input1)
     solb = model2.predict(X_inputb)
+
     results = data0.copy()
     results['Brine to Pure Water solubility Ratio'] = solb
     results['Pure Water Solubility (Mole Frac)'] = sol
     results['Co2 Solubility in Brine at P&T(Mole Frac)'] = sol * solb
+
     return results
 
 # -----------------------------
 # Title / Header
 # -----------------------------
-st.title(" CO₂ Solubility in Brine Calculator")
+st.title("CO₂ Solubility in Brine Calculator")
 
 st.markdown(
     "Product of Interaction of Phase-Behavior and Flow (IPB&F) Consortium"
@@ -143,30 +134,40 @@ st.markdown(
 st.divider()
 
 # -----------------------------
-# Original UI logic
+# UI logic
 # -----------------------------
 file = st.file_uploader("Upload the CSV file", type=['csv'])
 
 if file is not None:
-    # Load the data
-    data = pd.read_csv(file)
+    try:
+        # Load the data
+        data = pd.read_csv(file)
 
-    # Display the loaded data
-    st.subheader('Loaded Data:')
-    st.write(data)
+        # Display the loaded data
+        st.subheader("Loaded Data:")
+        st.dataframe(data, use_container_width=True)
 
-    # Call the predict function
-    results = predict_solubility(data)
+        # Automatically run prediction
+        results = predict_solubility(data)
 
-    # Display the result table
-    if st.button('Predict'):
-        st.write(results)
+        # Display prediction results
+        st.subheader("Prediction Results:")
+        st.dataframe(results, use_container_width=True)
 
-    # Download the results as csv
-    if st.button('Download Results'):
-        csv_data = results.to_csv(index=False)
-        tmp_download_link = download_link(csv_data, 'CO2_Solubility_Results.csv')
-        st.markdown(tmp_download_link, unsafe_allow_html=True)
+        # Direct download button
+        csv_data = results.to_csv(index=False).encode("utf-8")
+
+        st.download_button(
+            label="Download Results",
+            data=csv_data,
+            file_name="CO2_Solubility_Results.csv",
+            mime="text/csv",
+        )
+
+    except Exception as e:
+        st.error(f"Prediction failed: {e}")
+
+else:
+    st.info("Upload a CSV file to show the prediction results.")
 
 st.divider()
-

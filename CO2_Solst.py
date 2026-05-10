@@ -118,7 +118,7 @@ def predict_solubility(data0):
 # -----------------------------
 # Title / Header
 # -----------------------------
-st.title("UH CO₂ Solubility in Brine Calculator")
+st.title(" CO₂ Solubility in Brine Calculator")
 
 st.markdown(
     "Product of Interaction of Phase-Behavior and Flow (IPB&F) Consortium"
